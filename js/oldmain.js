@@ -206,8 +206,6 @@ require([
     const filterLessonsGuidingCheckbox = document.getElementById("filterLessonsGuiding");
     filterLessonsGuidingCheckbox.addEventListener("change", applyFilter);
 
-    console.log({cluster_count});
-
     const filterfilterDownhillSkiCheckbox = document.getElementById("filterDownhillSki");
     filterfilterDownhillSkiCheckbox.addEventListener("change", applyFilter);
 
