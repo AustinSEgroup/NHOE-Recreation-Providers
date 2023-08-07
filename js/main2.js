@@ -30,9 +30,9 @@ require([
         field: "cluster_count",
         stops: [
           { value: 0, size: 8 },
-          { value: 10, size: 12 },
+          { value: 3, size: 12 },
           { value: 50, size: 18 },
-          { value: 100, size: 48 }
+          { value: 100, size: 100 }
         ]
       }
     ],
@@ -130,6 +130,7 @@ require([
     },
     map: map
   });
+  
   function adjustClusterVisuals(selectedField) {
     layer.queryFeatures({
         where: `${selectedField} = '1'`,
