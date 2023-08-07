@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Recreation Providers Map</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.19/esri/themes/light/main.css">
+  <style>
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100vh;
+    }
+
+    #filterDiv {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  <div id="filterDiv">
+    <input type="checkbox" id="filterBiking" />
+    <label for="filterBiking">Biking</label>
+    <br>
+    <input type="checkbox" id="filterWhitewater" />
+    <label for="filterWhitewater">Whitewater/Paddle</label>
+    <!-- Add other checkboxes for each field you want to filter -->
+  </div>
+
+  <script src="https://js.arcgis.com/4.19/"></script>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/GeoJSONLayer",
+      "esri/widgets/Home",
+      "esri/widgets/Legend",
+      "esri/widgets/Expand"
+    ], function (Map, MapView, GeoJSONLayer, Home, Legend, Expand) {
+      const map = new Map({
+        basemap: "streets"
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-71.4969661, 43.6546402],
+        zoom: 10
+      });
+
+      const geoJSONData = {
+        // Paste the entire GeoJSON data here
+      };
+
+      const clusterConfig = {
+        type: "cluster",
+        clusterRadius: "100px",
+        // {cluster_count} is an aggregate field containing
+        // the number of features comprised by the cluster
+        popupTemplate: {
+          title: "Cluster summary",
+          content: "This cluster represents {cluster_count} earthquakes.",
+          fieldInfos: [{
+            fieldName: "cluster_count",
+            format: {
+              places: 0,
+              digitSeparator: true
+            }
+          }]
+        },
+        clusterMinSize: "8px",
+        clusterMaxSize: "60px",
+        labelingInfo: [{
+          deconflictionStrategy: "none",
+          labelExpressionInfo: {
+            expression: "Text($feature.cluster_count, '#,###')"
+          },
+          symbol: {
+            type: "text",
+            color: "#004a5d",
+            font: {
+              weight: "bold",
+              family: "Noto Sans",
+              size: "12px"
+            }
+          },
+          labelPlacement: "center-center",
+        }]
+      };
+
+      const geoJSONLayer = new GeoJSONLayer({
+        source: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/Recreation_Providers_GeoJSON/FeatureServer",
+        featureReduction: clusterConfig,
+        popupTemplate: {
+          title: "{Name}",
+          content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+          fieldInfos: [
+            // Add additional fieldInfos for other properties you want to display in the popup
+          ]
+        },
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "simple-marker",
+            size: 6,
+            color: "#69dcff",
+            outline: {
+              color: "rgba(0, 139, 174, 0.5)",
+              width: 1
+            }
+          }
+        }
+      });
+
+      map.add(geoJSONLayer);
+
+      // Function to apply the filter
+      function applyFilter() {
+        const filters = {};
+
+        // Add each field you want to filter here
+        if (document.getElementById("filterBiking").checked) {
+          filters["Biking"] = "x";
+        }
+
+        if (document.getElementById("filterWhitewater").checked) {
+          filters["Whitewater/Paddle"] = "x";
+        }
+
+        // Add other fields and their values as needed
+
+        // Determine if any filter is applied
+        const hasFilters = Object.keys(filters).length > 0;
+
+        // Set the featureReduction of the geoJSONLayer based on the filters
+        geoJSONLayer.featureReduction = hasFilters ? clusterConfig : null;
+
+        // If filters are applied, set the filterFunction to show only points that match the selected value
+        if (hasFilters) {
+          geoJSONLayer.filterFunction = (graphic) => {
+            for (const [field, value] of Object.entries(filters)) {
+              if (graphic.attributes[field] !== value) {
+                return false;
+              }
+            }
+            return true;
+          };
+        } else {
+          // Clear the filterFunction if no filters are applied
+          geoJSONLayer.filterFunction = null;
+        }
+      }
+
+      // Add event listeners to the checkboxes
+      const filterBikingCheckbox = document.getElementById("filterBiking");
+      const filterWhitewaterCheckbox = document.getElementById("filterWhitewater");
+      // Add other checkboxes as needed
+
+      filterBikingCheckbox.addEventListener("change", applyFilter);
+      filterWhitewaterCheckbox.addEventListener("change", applyFilter);
+      // Add other checkboxes as needed
+
+      view.whenLayerView(geoJSONLayer).then(function (layerView) {
+        view.goTo(layerView.fullExtent.expand(1.2));
+      });
+
+      view.ui.add(new Home({
+        view: view
+      }), "top-left");
+
+      const legend = new Legend({
+        view: view,
+        container: "legendDiv"
+      });
+
+      const infoDiv = document.createElement("div");
+      infoDiv.innerHTML = "<b>Information List:</b><br><ul><li>Recreation providers data</li><li>Other relevant information</li></ul>";
+      view.ui.add(new Expand({
+        view: view,
+        content: infoDiv,
+        expandIconClass: "esri-icon-layer-list",
+        expanded: false
+      }), "top-left");
+    });
+  </script>
+</body>
+
+</html>

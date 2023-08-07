@@ -7,28 +7,42 @@ require([
   "esri/widgets/Expand",
   "esri/widgets/Home",
 ], (Map, FeatureLayer, GeoJSONLayer, MapView, Legend, Expand, Home) => {
-  let selectedField = "Lessons_Guiding";
-  let layer;
+  let selectedField;
+  let heatmapLayer; // To store the heatmap layer
+  let clusterLayer; // To store the cluster layer
+  let isHeatmapView = false;
 
   function createClusterLayer(selectedField) {
-    const clusterConfig = {
+    let clusterConfig = {
       type: "cluster",
       clusterRadius: "100px",
       popupTemplate: {
         title: "{cluster_count} providers",
-        fieldInfos: [{
-          fieldName: "cluster_count",
-          format: {
-            places: 0,
-            digitSeparator: true
-          }
-        }]
+        fieldInfos: [
+          {
+            fieldName: "cluster_count",
+            format: {
+              places: 0,
+              digitSeparator: true,
+            },
+          },
+          {
+            fieldName: "cluster_size",
+            format: {
+              places: 0,
+              digitSeparator: true,
+            },
+          },
+        ],
       },
-      fields: [{
-        name: "cluster_size",
-        alias: "Cluster Size",
-        expression: `Sum($feature.${selectedField})`
-      }],
+      fields: [
+        {
+          name: "cluster_size",
+          alias: "Cluster Size",
+          onStatisticField: selectedField, // Aggregates the selected field within the cluster
+          statisticType: "sum", // Sum the selected field for all features within the cluster
+        },
+      ],
       visualVariables: [
         {
           type: "size",
@@ -37,34 +51,59 @@ require([
             { value: 0, size: 8 },
             { value: 10, size: 12 },
             { value: 50, size: 18 },
-            { value: 100, size: 48 }
-          ]
-        }
+            { value: 100, size: 48 },
+          ],
+        },
       ],
-      labelingInfo: [{
-        deconflictionStrategy: "none",
-        labelExpressionInfo: {
-          expression: "Text($feature.cluster_count, '#,###')"
+      labelingInfo: [
+        {
+          deconflictionStrategy: "none",
+          labelExpressionInfo: {
+            expression: "Text($feature.cluster_count, '#,###')",
+          },
+          symbol: {
+            type: "text",
+            color: "#004a5d",
+            font: {
+              weight: "bold",
+              family: "Noto Sans",
+              size: "12px",
+            },
+          },
+          labelPlacement: "center-center",
         },
-        symbol: {
-          type: "text",
-          color: "#004a5d",
-          font: {
-            weight: "bold",
-            family: "Noto Sans",
-            size: "12px"
-          }
-        },
-        labelPlacement: "center-center",
-      }]
+      ],
     };
-  }
-  
+
     if (layer) {
       // If the layer already exists, remove it from the map
       map.remove(layer);
     }
-  
+
+    clusterLayer = new FeatureLayer({
+      url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/RecreationProviders_with1s/FeatureServer",
+      featureReduction: clusterConfig,
+      popupTemplate: {
+        title: "{Name}",
+        content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+        fieldInfos: [
+          // Add additional fieldInfos for other properties you want to display in the popup
+        ],
+      },
+      renderer: {
+        type: "simple",
+        symbol: {
+          type: "simple-marker",
+          size: 6,
+          color: "#69dcff",
+          outline: {
+            color: "rgba(0, 139, 174, 0.5)",
+            width: 1,
+          },
+        },
+      },
+    });
+
 
   layer = new FeatureLayer({
     url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/RecreationProviders_with1s/FeatureServer",
@@ -89,6 +128,39 @@ require([
       }
     }
   });
+  map.add(clusterLayer);
+
+}
+
+function createHeatmapLayer(selectedField) {
+  // Create a heatmap renderer with the selected field
+  const heatmapRenderer = new HeatmapRenderer({
+    field: selectedField,
+    blurRadius: 15,
+    minPixelIntensity: 0,
+    maxPixelIntensity: 100,
+    colorStops: [
+      { ratio: 0, color: "rgba(255, 255, 255, 0)" },
+      { ratio: 0.2, color: "rgba(255, 255, 255, 0.8)" },
+      { ratio: 0.6, color: "rgba(255, 140, 0, 0.8)" },
+      { ratio: 0.8, color: "rgba(255, 0, 0, 0.8)" },
+      { ratio: 1, color: "rgba(128, 0, 0, 0.8)" },
+    ],
+  });
+
+  // Remove existing heatmap layer, if any
+  if (heatmapLayer) {
+    map.remove(heatmapLayer);
+  }
+
+  // Create a new FeatureLayer with the heatmap renderer
+  heatmapLayer = new FeatureLayer({
+    url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/RecreationProviders_with1s/FeatureServer",
+    renderer: heatmapRenderer,
+  });
+
+  map.add(heatmapLayer);
+}
 
   // background layer for geographic context
   const baseLayer = new FeatureLayer({
@@ -119,7 +191,7 @@ require([
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [23, 65, 65, 1],
+        color: "rgba(168, 0, 0, 0.17)",
         outline: {
           color: [50, 50, 50, 0.75],
           width: 0.5
@@ -129,7 +201,7 @@ require([
   });
 
   const map = new Map({
-    layers: [baseLayer, retailServiceProviders, layer]
+    layers: [baseLayer, retailServiceProviders]
   });
 
   const view = new MapView({
@@ -143,24 +215,28 @@ require([
 
   // Function to apply the filters based on the selected checkboxes
     // Add each field you want to filter here
+
     function applyFilter() {
       const filters = {};
-    
+    console.log(selectedField);
       // Add each field you want to filter here
       // Replace spaces and slashes with underscores in the field names
       if (document.getElementById("filterLessonsGuiding").checked) {
         filters["Lessons_Guiding"] = "1";
         selectedField = "Lessons_Guiding";
+        createClusterLayer(selectedField);
       } 
       
       else if (document.getElementById("filterDownhillSki").checked) {
         filters["Downhill_Ski"] = "1";
         selectedField = "Downhill_Ski";
+        createClusterLayer(selectedField);
       } 
       
       else if (document.getElementById("filterNordicSkiSnowshoe").checked) {
         filters["Nordic_Ski_Snowshoe"] = "1";
         selectedField = "Nordic_Ski_Snowshoe";
+        createClusterLayer(selectedField);
       }
       
       else if (document.getElementById("filterBiking").checked) {
@@ -202,6 +278,7 @@ require([
       else if (document.getElementById("filterFishing").checked) {
         filters["Snowmobile"] = "1";
         selectedField = "Fishing";
+        console.log(selectedField);
       } 
       
       else if (document.getElementById("filterArcheryShootingHunting").checked) {
@@ -227,8 +304,10 @@ require([
       else if (document.getElementById("filterSleepawaySummerCamps").checked) {
         filters["Sleepaway_Summer_Camps"] = "1";
         selectedField = "Sleepaway_Summer_Camps";
-      };
+      }
     
+      
+
       // Determine if any filter is applied
       const hasFilters = Object.keys(filters).length > 0;
     
@@ -246,7 +325,11 @@ require([
         // Clear the definitionExpression if no filters are applied
         layer.definitionExpression = "";
       }
+
+      createClusterLayer(selectedField);
+      
     }
+
     const filterLessonsGuidingCheckbox = document.getElementById("filterLessonsGuiding");
     filterLessonsGuidingCheckbox.addEventListener("change", applyFilter);
 
@@ -315,6 +398,7 @@ require([
     expanded: false
   }), "top-left");
 
+  createClusterLayer(selectedField);
 });
 
 
