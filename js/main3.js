@@ -10,7 +10,7 @@ require([
 ], (Map, FeatureLayer, GeoJSONLayer, WebTileLayer, MapView, Legend, Expand, Home) => {
   let selectedField;
   let clusterConfig;
-
+ 
 
 function drawCluster() {
   console.log(`${selectedField}`)
@@ -48,7 +48,7 @@ function drawCluster() {
       symbol: {
         type: "simple-marker",
         style: "circle",
-        color: "#83DBBB",
+        color: "rgba(36, 207, 227 ,  0.5)",
         size: 24,
         outline: {
           color: "#9BF1D2",
@@ -110,10 +110,83 @@ renderer: {
       type: "simple",
       symbol: {
         type: "simple-marker",
-        size: 6,
-        color: "#69dcff",
+        size: 4,
+        color: "rgba(106, 236, 147, 0.5)",
         outline: {
-          color: "rgba(0, 139, 174, 0.5)",
+          color: "rgba(106, 236, 147, 0.5)",
+          width: 1
+        }
+      }
+    }
+  });
+
+  const nonProfits = new FeatureLayer({
+    url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/NonProfit_with1s/FeatureServer",
+    featureReduction: clusterConfig,
+    popupTemplate: {
+      title: "{Name}",
+      content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+      fieldInfos: [
+        // Add additional fieldInfos for other properties you want to display in the popup
+      ]
+    },
+renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-marker",
+        size: 4,
+        color: "rgba(41, 110, 214 ,  0.5)",
+        outline: {
+          color: "rgba(41, 110, 214 ,  0.5)",
+          width: 1
+        }
+      }
+    }
+  });
+
+  
+  const B2B = new FeatureLayer({
+    url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/B2B_with1s/FeatureServer",
+    featureReduction: clusterConfig,
+    popupTemplate: {
+      title: "{Name}",
+      content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+      fieldInfos: [
+        // Add additional fieldInfos for other properties you want to display in the popup
+      ]
+    },
+renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-marker",
+        size: 6,
+        color: "rgba(214, 104, 41  ,  0.5)",
+        outline: {
+          color: "rgba(214, 104, 41  ,  0.5)",
+          width: 1
+        }
+      }
+    }
+  });
+
+  const retailBusinesses = new FeatureLayer({
+    url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/RetailServiceBusinesses_with1s/FeatureServer",
+    featureReduction: clusterConfig,
+    popupTemplate: {
+      title: "{Name}",
+      content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+      fieldInfos: [
+        // Add additional fieldInfos for other properties you want to display in the popup
+      ]
+    },
+renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-marker",
+        size: 4,
+        color: "rgba(36, 207, 227 ,  0.5)",
+        outline: {
+          color: "rgba(36, 207, 227 ,  0.5)",
           width: 1
         }
       }
@@ -159,7 +232,7 @@ renderer: {
   });
 
   const map = new Map({
-    layers: [baseLayer, newHampshire, retailServiceProviders, layer]
+    layers: [baseLayer, newHampshire, retailServiceProviders, layer, retailBusinesses, nonProfits, B2B]
   });
 
   const view = new MapView({
@@ -170,8 +243,8 @@ renderer: {
     },
     map: map
   });
-  
-  layer.effect = "bloom(0.1, 0.1px, 15%)";
+   retailBusinesses.effect = "bloom(0.5, 0.1px, 15%)";
+  layer.effect = "bloom(0.5, 0.1px, 15%)";
   newHampshire.effect = "bloom(1, 0.1px, 15%)";
   
 
@@ -195,92 +268,118 @@ renderer: {
   };
   
   function applyFilter() {
-      
-      const filters = {};
-      
-      for (let [id, field] of Object.entries(filterFieldsMap)) {
-          if (document.getElementById(id).checked) {
+    const filters = {};
+    
+    for (let [id, field] of Object.entries(filterFieldsMap)) {
+        if (document.getElementById(id).checked) {
             selectedField = field;
-              filters[field] = "1";
-              
-              
-          }
-
-          
-      }
-     
-
-      let definitionExpression = Object.keys(filters).map(field => `${field} = '1'`).join(" AND ");
-      layer.definitionExpression = definitionExpression;
-          // Redraw the cluster based on the new selected field
-          if (Object.keys(filters).length > 0) {
-            drawCluster(); // Redraw the cluster based on the new selected field
-            layer.featureReduction = clusterConfig; // Update the layer's featureReduction with the updated clusterConfig
-        } else {
-            layer.featureReduction = null; // No filter selected, turn off clustering
+            filters[field] = "1";
         }
     }
+
+    let definitionExpression = Object.keys(filters).map(field => `${field} = '1'`).join(" AND ");
+    layer.definitionExpression = definitionExpression;
+
+    // Check if any filter is selected, and update clustering and heatmap accordingly
+    if (Object.keys(filters).length > 0) {
+        drawCluster(); // Redraw the cluster based on the new selected field
+        layer.featureReduction = clusterConfig; // Update the layer's featureReduction with the updated clusterConfig
+        
+        // Check if heatmap is enabled, then disable it
+        if (isHeatmapEnabled) {
+            layer.renderer = {
+                type: "simple",
+                symbol: {
+                    type: "simple-marker",
+                    size: 6,
+                    color: "#69dcff",
+                    outline: {
+                        color: "rgba(0, 139, 174, 0.5)",
+                        width: 1
+                    }
+                }
+            };
+            layer.featureReduction = clusterConfig; // Re-enable clustering
+            isHeatmapEnabled = false;
+            document.getElementById('toggleHeatmap').textContent = "Enable Heatmap";
+        }
+    } else {
+        layer.featureReduction = null; // No filter selected, turn off clustering
+        
+        // Check if heatmap is enabled, then disable it
+        if (isHeatmapEnabled) {
+            layer.renderer = {
+                type: "simple",
+                symbol: {
+                    type: "simple-marker",
+                    size: 6,
+                    color: "#69dcff",
+                    outline: {
+                        color: "rgba(0, 139, 174, 0.5)",
+                        width: 1
+                    }
+                }
+            };
+            isHeatmapEnabled = false;
+            document.getElementById('toggleHeatmap').textContent = "Enable Heatmap";
+        }
+    }
+}
   
   
   for (let id of Object.keys(filterFieldsMap)) {
       document.getElementById(id).addEventListener("change", applyFilter);
   }
   
+
   /* =
   ************************************************************
          ****************   HEATMAP *******************
   */
-  const heatmapRenderer = {
-    type: "heatmap",
-    colorStops: [
-      { ratio: 0, color: "rgba(202, 255, 200, 0)" }, // Transparent white for lowest intensity
-      { ratio: 0.2, color: "rgba(198, 245, 165, .75)" }, // Opaque white for low intensity
-      { ratio: 0.4, color: "rgba(216, 255, 113, .80)" },  // Yellow color for moderate intensity
-      { ratio: 0.6, color: "rgba(244, 254, 90 , .90)" },  // Orange color for higher intensity
-      { ratio: 0.8, color: "rgba(255, 207, 55 , .95)" },   // Dark orange for even higher intensity
-      { ratio: 1, color: "rgba(255, 140, 55 , 100)" },      // Red for highest intensity
-    ],
-    minPixelIntensity: 25,
-    maxPixelIntensity: 100,
-    radius: 15,
-};
-
-
-
- let isHeatmapEnabled = false;
-
-function toggleHeatmapFunction() {
-  if (isHeatmapEnabled) {
-      // Switch back to clustering
-      layer.renderer = { // This was clusterRenderer, which isn't defined. Changing to use simple renderer
-          type: "simple",
-          symbol: {
-              type: "simple-marker",
-              size: 6,
-              color: "#69dcff",
-              outline: {
-                  color: "rgba(0, 139, 174, 0.5)",
-                  width: 1
-              }
-          }
-      };
-      layer.featureReduction = clusterConfig;  // Apply clustering
-      isHeatmapEnabled = false;  // Set the flag
-      this.textContent = "Enable Heatmap";  // Update button text
-  } else {
-      // Switch to heatmap
-      layer.renderer = heatmapRenderer;  // Set the heatmap renderer
-      layer.featureReduction = null;  // Disable clustering
-      isHeatmapEnabled = true;  // Set the flag
-      this.textContent = "Disable Heatmap";  // Update button text
-  }
-}
-
-document.getElementById('toggleHeatmap').addEventListener('click', toggleHeatmapFunction);
+ 
 /* 
   ************************************************************
          ****************   OTHER ITEMS *******************
   */
+
+         let visibleLayer = layer
+
+         // CLUSTER STYLES
+         
+            // Function to toggle the visibility of layers
+      function toggleLayerVisibility(layerToShow) {
+        visibleLayer.visible = false; // Hide the current visible layer
+
+        // Disable clustering for the previously visible layer
+        if (visibleLayer.featureReduction && visibleLayer.featureReduction.type === "cluster") {
+          visibleLayer.featureReduction = null;
+        }
+
+        layerToShow.visible = true; // Show the new selected layer
+        visibleLayer = layerToShow; // Update the reference to the visible layer
+
+        // Enable clustering for the newly visible layer
+        if (layerToShow === layer && document.getElementById("toggleClustering").textContent === "Disable Clustering") {
+          drawCluster();
+          layer.featureReduction = clusterConfig;
+        }
+      }
+         
+         document.getElementById('toggleLayer1').addEventListener('click', function() {
+           toggleLayerVisibility(layer);
+         });
+         
+         document.getElementById('toggleLayer2').addEventListener('click', function() {
+           toggleLayerVisibility(retailBusinesses);
+         });
+         
+         document.getElementById('toggleLayer3').addEventListener('click', function() {
+           toggleLayerVisibility(nonProfits);
+         });
+         
+         document.getElementById('toggleLayer4').addEventListener('click', function() {
+           toggleLayerVisibility(B2B);
+         });
    
   view.whenLayerView(layer).then(function (layerView) {
     view.goTo(layerView.fullExtent.expand(1.2));

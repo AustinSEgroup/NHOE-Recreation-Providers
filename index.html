@@ -7,33 +7,51 @@
     <title>Recreation Providers</title>
 
     <style>
-      html,
-      body,
-      #viewDiv {
-        padding: 0;
-        margin: 0;
-        height: 100%;
-        width: 100%;
-        background: rgba(50, 50, 50);
-      }
+    html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(50, 50, 50);
+}
 
-      .toggle-btn {
-            /* Button Default State */
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 14px;
-            border: none;
-            color: white;
-            background-color: #4CAF50;
-            cursor: pointer;
-            text-align: center;
-            transition-duration: 0.4s;
-        }
+.top-bar {
+  background-color: #333; /* Change the background color as desired */
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-        .toggle-btn:hover {
-            /* Button Hover State */
-            background-color: #45a049;
-        }
+.toggle-btn {
+  /* Button Default State */
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  color: white;
+  background-color: #4caf50;
+  cursor: pointer;
+  text-align: center;
+  transition-duration: 0.4s;
+}
+
+.toggle-btn:hover {
+  /* Button Hover State */
+  background-color: #45a049;
+}
+
+#mapContainer {
+  position: relative;
+  height: calc(100% - 20px); /* Adjust the height to make room for the top bar */
+}
+
+#viewDiv {
+  position: absolute;
+  top: 1%; /* Set the top position to match the height of the top bar */
+  bottom: 0;
+  width: 100%;
+}
 
     </style>
 
@@ -44,13 +62,20 @@
   </head>
 
   <body>
+    <div id="selectedFieldDiv"></div>
 
-<div id="selectedFieldDiv"></div>
+    <div class="top-bar">
+
+      <button id="toggleLayer1" class="toggle-btn" data-layer="layer">Recreation Providers</button>
+      <button id="toggleLayer2" class="toggle-btn" data-layer="retailBusinesses">Retail Businesses</button>
+      <button id="toggleLayer3" class="toggle-btn" data-layer="nonProfits">Non-Profits</button>
+      <button id="toggleLayer4" class="toggle-btn" data-layer="B2B">B2B</button>
+      <!-- Add other buttons you want to include in the top bar -->
+    </div>
+
+    <div id="mapContainer">
     <div id="viewDiv"></div>
-
     <div id="infoDiv" class="esri-widget">
-      <button id="toggleLayer" class="toggle-btn">Toggle Layer Visibility</button>
-      <button id="toggleHeatmap" class="toggle-btn">Enable Heatmap</button>
       <div id="filterDiv">
         <input type="checkbox" id="filterLessonsGuiding" />
         <label for="filterLessonsGuiding">Lessons/Guiding</label>
@@ -101,5 +126,7 @@
         <label for="filterSleepawaySummerCamps">Sleepaway Summer Camps</label>
       </div>
     </div>
+  </div>
+    
   </body>
 </html>
