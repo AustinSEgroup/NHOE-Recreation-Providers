@@ -17,10 +17,9 @@ body {
 }
 
 .top-bar {
-  background-color: #333; /* Change the background color as desired */
-  padding: 10px;
+  background-color: #207380; /* Change the background color as desired */
   display: flex;
-  justify-content: space-between;
+  justify-content:center;
   align-items: center;
 }
 
@@ -44,7 +43,7 @@ body {
 
 #mapContainer {
   position: relative;
-  height: calc(100% - 20px); /* Adjust the height to make room for the top bar */
+  height: calc(100% - 10px); /* Adjust the height to make room for the top bar */
 }
 
 #infoDiv {
@@ -70,14 +69,20 @@ body {
     <div id="selectedFieldDiv"></div>
 
     <div class="top-bar">
-      <button id="toggleLayer" class="toggle-btn">Toggle Layer Visibility</button>
+      <button id="toggleCounties" class="toggle-btn">Show Counties</button>
+      <button id="toggleTourismRegions" class="toggle-btn">Show Tourism Regions</button>
       <!-- <button id="toggleHeatmap" class="toggle-btn">Disable Heatmap</button> -->
       
       <!-- Add other buttons you want to include in the top bar -->
     </div>
 
     <div id="mapContainer">
-    <div id="viewDiv"></div>
+    <div id="viewDiv">
+
+      
+
+    </div>
+    
     <div id="infoDiv" class="esri-widget">
       <div id="filterDiv">
         <button id="toggleClustering" class="toggle-btn">Toggle Clustering</button>
@@ -130,6 +135,7 @@ body {
         <input type="checkbox" id="filterSleepawaySummerCamps" />
         <label for="filterSleepawaySummerCamps">Sleepaway Summer Camps</label>
       </div>
+      
     </div>
   </div>
     

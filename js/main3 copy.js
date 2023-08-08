@@ -94,7 +94,7 @@ function drawCluster() {
       labelPlacement: "center-center",
     }]
   };
-  layer.featureReduction = clusterConfig;
+  recProv.featureReduction = clusterConfig;
 }
 
 
@@ -142,7 +142,7 @@ const countyLabels = {  // autocasts as new LabelClass(){  // autocasts as new L
   };
 /************************** LAYER IMPORTS **********************/
 
-  const layer = new FeatureLayer({
+  const recProv= new FeatureLayer({
     url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/RecreationProviders_with1s/FeatureServer",
     featureReduction: clusterConfig,
     popupTemplate: {
@@ -166,6 +166,78 @@ renderer: {
     }
   });
 
+  const nonProfits = new FeatureLayer({
+    url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/NonProfit_with1s/FeatureServer",
+    featureReduction: clusterConfig,
+    popupTemplate: {
+      title: "{Name}",
+      content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+      fieldInfos: [
+        // Add additional fieldInfos for other properties you want to display in the popup
+      ]
+    },
+renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-marker",
+        size: 4,
+        color: "rgba(41, 110, 214 ,  0.5)",
+        outline: {
+          color: "rgba(41, 110, 214 ,  0.5)",
+          width: 1
+        }
+      }
+    }
+  });
+
+  
+  const B2B = new FeatureLayer({
+    url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/B2B_with1s/FeatureServer",
+    featureReduction: clusterConfig,
+    popupTemplate: {
+      title: "{Name}",
+      content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+      fieldInfos: [
+        // Add additional fieldInfos for other properties you want to display in the popup
+      ]
+    },
+renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-marker",
+        size: 6,
+        color: "rgba(214, 104, 41  ,  0.5)",
+        outline: {
+          color: "rgba(214, 104, 41  ,  0.5)",
+          width: 1
+        }
+      }
+    }
+  });
+
+  const retailBusinesses = new FeatureLayer({
+    url: "https://services8.arcgis.com/YKIZLV97YLZN6bol/arcgis/rest/services/RetailServiceBusinesses_with1s/FeatureServer",
+    featureReduction: clusterConfig,
+    popupTemplate: {
+      title: "{Name}",
+      content: "Town or City: {Town or City}<br>Website: <a href='{Website}' target='_blank'>{Website}</a>",
+      fieldInfos: [
+        // Add additional fieldInfos for other properties you want to display in the popup
+      ]
+    },
+renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-marker",
+        size: 4,
+        color: "rgba(36, 207, 227 ,  0.5)",
+        outline: {
+          color: "rgba(36, 207, 227 ,  0.5)",
+          width: 1
+        }
+      }
+    }
+  });
   // background layer for geographic context
   const baseLayer = new WebTileLayer({
     urlTemplate: "https://api.mapbox.com/styles/v1/anovak/clkvo8z6e001j01q0b8ln9s7j/tiles/256/{level}/{col}/{row}?access_token=pk.eyJ1IjoiYW5vdmFrIiwiYSI6ImNsa2Zyd2ZvdjFjbHAzaW8zNnd4ODkwaHcifQ.V-0D14XZBY5lfMfw8Qg7vg",
@@ -266,7 +338,7 @@ newHampshireCounties.visible = false;
 
 /************************* MAP INITIALIZATION *************************/
   const map = new Map({
-    layers: [baseLayer, newHampshire, newHampshireCounties, tourismRegions, retailServiceProviders, layer]
+    layers: [baseLayer, newHampshire, newHampshireCounties, tourismRegions, retailServiceProviders, recProv, retailBusinesses, B2B, nonProfits]
   });
 
   const view = new MapView({
@@ -279,8 +351,43 @@ newHampshireCounties.visible = false;
   });
   
   newHampshire.effect = "bloom(1, 0.1px, 15%)";
-  
 
+
+    const filterFieldsRetailBusiness = {
+        filterNationalChain: "National Chain",
+        filterRegionalChain: "Regional Chain",
+        filterLocalBusiness: "Local Business",
+        filterGuidingTraining: "Guiding/Training",
+        filterSocialEvents: "Social Events",
+        filterUsedGear: "Used Gear",
+        filterHiking: "Hiking",
+        filterSnowshoeing: "Snowshoeing",
+        filterRunningTrailRunning: "Running/Trail Running",
+        filterMotorizedBoatingWaterSports: "Motorized Boating & Water sports",
+        filterWhitewaterSports: "Whitewater sports",
+        filterPaddleSports: "Paddle sports",
+        filterMountainBiking: "Mountain Biking",
+        filterRoadGravelBiking: "Road/Gravel Biking",
+        filterBMX: "BMX",
+        filterSkateboardingRollerskating: "Skateboarding/Rollerskating",
+        filterOHRV: "OHRV",
+        filterHunting: "Hunting",
+        filterFishing: "Fishing",
+        filterCamping: "Camping",
+        filterWildlifeViewing: "Wildlife Viewing",
+        filterSurfing: "Surfing",
+        filterSwimmingDiving: "Swimming/Diving",
+        filterSnowmobiling: "Snowmobiling",
+        filterDownhillSkiingSnowboarding: "Downhill Skiing & Snowboarding",
+        filterBackcountryAlpineSkiing: "Backcountry Alpine Skiing",
+        filterNordicSkiing: "Nordic Skiing",
+        filterRockClimbing: "Rock Climbing",
+        filterIceClimbing: "Ice Climbing",
+        filterMountaineering: "Mountaineering",
+        filterHorseback: "Horseback",
+        filterOther: "Other",
+      };
+  
     const filterFieldsMap = {
       filterLessonsGuiding: "Lessons_Guiding",
       filterDownhillSki: "Downhill_Ski",
@@ -299,7 +406,24 @@ newHampshireCounties.visible = false;
       filterWildlifeViewing: "Wildlife_Viewing",
       filterSleepawaySummerCamps: "Sleepaway_Summer_Camps"
   };
-  layer.effect = "bloom(3, 0.1px, 15%)";
+
+  const filterFieldsMapB2B = {
+    filterB2BSalesDistribution: "B2B Sales/Distribution",
+    filterManufacturing: "Manufacturing",
+    filterDesignConstruction: "Design/Construction",
+    filterConsultingServices: "Consulting Services",
+    filterOtherB2B: "Other",
+  };
+
+  const filterFieldsMapNonProfits = {
+    filterIndustryAssociationAdvocate: "Industry Association/Advocate",
+    filterOutdoorRecOutings: "Outdoor Rec. Outings",
+    filterEnvEd: "Env. Ed.",
+    filterTrailDevelopmentMaintenance: "Trail Development & Maintenance",
+    filterLandConservationStewardship: "Land Conservation/Stewardship",
+  };
+  
+  recProv.effect = "bloom(3, 0.1px, 15%)";
   function applyFilter() {
     const filters = {};
     
@@ -311,17 +435,17 @@ newHampshireCounties.visible = false;
     }
   
     let definitionExpression = Object.keys(filters).map(field => `${field} = '1'`).join(" AND ");
-    layer.definitionExpression = definitionExpression;
+    recProv.definitionExpression = definitionExpression;
   
     if (Object.keys(filters).length > 0) {
       // Filters are selected, enable clustering and redraw cluster
       drawCluster();
-      layer.featureReduction = clusterConfig;
-      layer.effect = "bloom(0, 0.1px, 15%)";
+      recProv.featureReduction = clusterConfig;
+      recProv.effect = "bloom(0, 0.1px, 15%)";
     } else {
       // No filters selected, disable clustering
-      layer.featureReduction = null;
-      layer.effect = "bloom(3, 0.1px, 15%)";
+      recProv.featureReduction = null;
+      recProv.effect = "bloom(3, 0.1px, 15%)";
     }
   }
   
@@ -331,87 +455,19 @@ newHampshireCounties.visible = false;
   
   document.getElementById('toggleClustering').addEventListener('click', function() {
       if (isClusteringEnabled) {
-          layer.featureReduction = null;
+        recProv.featureReduction = null;
           isClusteringEnabled = false;
           this.textContent = "Toggle Clustering";
-          layer.effect = "bloom(3, 0.1px, 15%)";
+          recProv.effect = "bloom(3, 0.1px, 15%)";
       } else {
-          layer.featureReduction = clusterConfig;
+        recProv.featureReduction = clusterConfig;
           isClusteringEnabled = true;
           this.textContent = "Toggle Clustering";
-          layer.effect = "bloom(0, 0.1px, 15%)";
+          recProv.effect = "bloom(0, 0.1px, 15%)";
       }
   });
-  /* =
-  ************************************************************
-         ****************   HEATMAP *******************
-  
-  const heatmapRenderer = {
-    type: "heatmap",
-    colorStops: [
-      { ratio: 0, color: "rgba(143, 254, 240, 0)" }, // Transparent white for lowest intensity
-      { ratio: 0.1, color: "rgba(230, 255, 190 , .55)" }, // Opaque white for low intensity
-      { ratio: 0.2, color: "rgba(246, 255, 138 , .65)" },  // Yellow color for moderate intensity
-      { ratio: 0.3, color: "rgba(255, 217, 88, .75)" },  // Orange color for higher intensity
-      { ratio: 0.4, color: "rgba(255, 162, 74, .85)" },   // Dark orange for even higher intensity
-      { ratio: 0.6, color: "rgba(255, 107, 60,   .95)" },      // Red for highest intensity
-    ],
-    minPixelIntensity: 0,
-    maxPixelIntensity: 100,
-    radius: 15,
-};
-
-
-document.getElementById('toggleLayer').addEventListener('click', function() {
-  if (layer.visible) {
-      // Hide the layer
-      layer.visible = false;
-      isClusteringEnabled = false;
-      this.textContent = "Show Layer";
-  } else {
-      // Show the layer
-      layer.visible = true;
-      isClusteringEnabled = true;
-      this.textContent = "Hide Layer";
-  }
-});
-
- let isHeatmapEnabled = false;
-
-function toggleHeatmapFunction() {
-  if (isHeatmapEnabled) {
-      // Switch back to clustering
-      layer.renderer = { // This was clusterRenderer, which isn't defined. Changing to use simple renderer
-          type: "simple",
-          symbol: {
-              type: "simple-marker",
-              size: 3,
-              color: "rgba(80, 249, 213, 0.5)",
-              outline: {
-                  color: "rgba(80, 249, 213, 0.5)",
-                  width: 1
-              }
-          }
-      };
-      layer.featureReduction = clusterConfig;  // Apply clustering
-      isHeatmapEnabled = false;  // Set the flag
-      this.textContent = "Enable Heatmap";  // Update button text
-  } else {
-      // Switch to heatmap
-      layer.renderer = heatmapRenderer;  // Set the heatmap renderer
-      layer.featureReduction = null;  // Disable clustering
-      isHeatmapEnabled = true;  // Set the flag
-      this.textContent = "Disable Heatmap";  // Update button text
-  }
-}
-
-document.getElementById('toggleHeatmap').addEventListener('click', toggleHeatmapFunction);
-/* 
-  ************************************************************
-         ****************   OTHER ITEMS *******************
-  */
    
-  view.whenLayerView(layer).then(function (layerView) {
+  view.whenLayerView(recProv).then(function (layerView) {
     view.goTo(layerView.fullExtent.expand(1.2));
   });
   const infoDiv = document.getElementById("infoDiv");
