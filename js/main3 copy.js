@@ -13,8 +13,8 @@ require([
   let clusterConfig;
 
 
-function drawCluster() {
-  console.log(`${selectedField}`)
+function drawClusterRecProv() {
+  console.log(`${selectedFieldRecProv}`)
    clusterConfig = {
     
     type: "cluster",
@@ -39,9 +39,9 @@ function drawCluster() {
       ],
     },
     fields: [{
-      name: `${selectedField}`,
-      alias: `${selectedField}`,
-      onStatisticField: `${selectedField}`,
+      name: `${selectedFieldRecProv}`,
+      alias: `${selectedFieldRecProv}`,
+      onStatisticField: `${selectedFieldRecProv}`,
       statisticType: "sum"
     }],
     renderer: {
@@ -59,7 +59,7 @@ function drawCluster() {
       visualVariables: [
         {
           type: "size",
-          field: `${selectedField}`,
+          field: `${selectedFieldRecProv}`,
           stops: [
             { value: 1, size: 4 },
             { value: 2, size: 6 },
@@ -424,12 +424,12 @@ newHampshireCounties.visible = false;
   };
   
   recProv.effect = "bloom(3, 0.1px, 15%)";
-  function applyFilter() {
+  function applyFilterRecProv() {
     const filters = {};
     
     for (let [id, field] of Object.entries(filterFieldsMap)) {
       if (document.getElementById(id).checked) {
-        selectedField = field;
+        selectedFieldRecProv = field;
         filters[field] = "1";
       }
     }
@@ -439,7 +439,7 @@ newHampshireCounties.visible = false;
   
     if (Object.keys(filters).length > 0) {
       // Filters are selected, enable clustering and redraw cluster
-      drawCluster();
+      drawClusterRecProv();
       recProv.featureReduction = clusterConfig;
       recProv.effect = "bloom(0, 0.1px, 15%)";
     } else {
