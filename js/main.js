@@ -201,7 +201,7 @@ function createHeatmapLayer(selectedField) {
   });
 
   const map = new Map({
-    layers: [baseLayer, retailServiceProviders]
+    layers: [baseLayer, retailServiceProviders, layer]
   });
 
   const view = new MapView({

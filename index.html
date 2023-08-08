@@ -40,18 +40,17 @@
     <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/dark/main.css" />
     <script src="https://js.arcgis.com/4.27/"></script>
 
-    <script src="js/main2.js"></script>
+    <script src="js/main3.js"></script>
   </head>
 
   <body>
 
-
-<button id="toggleHeatmap" class="toggle-btn">Enable Heatmap</button>
-<button id="toggleClustering" class="toggle-btn">Enable Clustering</button>
-
+<div id="selectedFieldDiv"></div>
     <div id="viewDiv"></div>
 
     <div id="infoDiv" class="esri-widget">
+      <button id="toggleLayer" class="toggle-btn">Toggle Layer Visibility</button>
+      <button id="toggleHeatmap" class="toggle-btn">Enable Heatmap</button>
       <div id="filterDiv">
         <input type="checkbox" id="filterLessonsGuiding" />
         <label for="filterLessonsGuiding">Lessons/Guiding</label>
@@ -101,7 +100,6 @@
         <input type="checkbox" id="filterSleepawaySummerCamps" />
         <label for="filterSleepawaySummerCamps">Sleepaway Summer Camps</label>
       </div>
-      <div id="legendDiv"></div>
     </div>
   </body>
 </html>

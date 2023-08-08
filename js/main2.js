@@ -28,12 +28,6 @@ require([
       {
         type: "size",
         field: "cluster_count",
-        stops: [
-          { value: 0, size: 8 },
-          { value: 3, size: 12 },
-          { value: 50, size: 18 },
-          { value: 100, size: 100 }
-        ]
       }
     ],
     labelingInfo: [{
@@ -126,7 +120,7 @@ require([
     container: "viewDiv",
     center: [-71.5, 43.75],
     constraints: {
-      minScale: 3000000
+      minScale: 4000000
     },
     map: map
   });
@@ -141,7 +135,7 @@ require([
         }]
     }).then(function(result) {
         var total = result.features[0].attributes.total;
-        var maxSize = 18;
+        var maxSize = 50;
         var sizeIncrement = maxSize / total;
 
         clusterConfig.visualVariables[0].stops = [
@@ -155,6 +149,7 @@ require([
         
     });
   }
+  
   layer.effect = "bloom(0.1, 0.1px, 15%)";
   newHampshire.effect = "bloom(1, 0.1px, 15%)";
   // Function to apply the filters based on the selected checkboxes
@@ -167,82 +162,83 @@ require([
       if (document.getElementById("filterLessonsGuiding").checked) {
         filters["Lessons_Guiding"] = "1";
         selectedField = "Lessons_Guiding";
+        adjustClusterVisuals();
       } 
       
-      else if (document.getElementById("filterDownhillSki").checked) {
+      if (document.getElementById("filterDownhillSki").checked) {
         filters["Downhill_Ski"] = "1";
         selectedField = "Downhill_Ski";
 
       } 
       
-      else if (document.getElementById("filterNordicSkiSnowshoe").checked) {
+      if (document.getElementById("filterNordicSkiSnowshoe").checked) {
         filters["Nordic_Ski_Snowshoe"] = "1";
         selectedField = "Nordic_Ski_Snowshoe";
       }
       
-      else if (document.getElementById("filterBiking").checked) {
+      if (document.getElementById("filterBiking").checked) {
         filters["Biking"] = "1";
         selectedField = "Biking";
       } 
       
-      else if (document.getElementById("filterWhitewater").checked) {
+      if (document.getElementById("filterWhitewater").checked) {
         filters["Whitewater_Paddle"] = "1";
         selectedField = "Whitewater_Paddle";
       } 
       
-      else if (document.getElementById("filterOHRV").checked) {
+      if (document.getElementById("filterOHRV").checked) {
         filters["OHRV"] = "1";
         selectedField = "OHRV";
       } 
       
-      else if (document.getElementById("filterCampground").checked) {
+      if (document.getElementById("filterCampground").checked) {
         filters["Campground"] = "1";
         selectedField = "Campground";
       } 
       
-      else if (document.getElementById("filterClimbingMountaineeringHiking").checked) {
+      if (document.getElementById("filterClimbingMountaineeringHiking").checked) {
         filters["Climbing_Mountaineering_Hiking"] = "1";
         selectedField = "Climbing_Mountaineering_Hiking";
       } 
       
-      else if (document.getElementById("filterMotorizedBoatingWaterSports").checked) {
+      if (document.getElementById("filterMotorizedBoatingWaterSports").checked) {
         filters["Motorized_Boating_Water_Sports"] = "1";
         selectedField = "Motorized_Boating_Water_Sports";
         
       } 
       
-      else if (document.getElementById("filterSnowmobile").checked) {
+      if (document.getElementById("filterSnowmobile").checked) {
         filters["Snowmobile"] = "1";
         selectedField = "Snowmobile";
       } 
       
-      else if (document.getElementById("filterFishing").checked) {
+      if (document.getElementById("filterFishing").checked) {
         filters["Snowmobile"] = "1";
         selectedField = "Fishing";
         console.log(selectedField);
       } 
       
-      else if (document.getElementById("filterArcheryShootingHunting").checked) {
+      if (document.getElementById("filterArcheryShootingHunting").checked) {
         filters["Archery_Shooting_Hunting"] = "1";
         selectedField = "Archery_Shooting_Hunting";
       } 
       
-      else if (document.getElementById("filterSurfing").checked) {
+      if (document.getElementById("filterSurfing").checked) {
         filters["Surfing"] = "1";
         selectedField = "Surfing";
       }
       
-      else if (document.getElementById("filterHorsebackRiding").checked) {
+      if (document.getElementById("filterHorsebackRiding").checked) {
         filters["Horseback_Riding"] = "1";
         selectedField = "Horseback_Riding";
       } 
       
-      else if (document.getElementById("filterWildlifeViewing").checked) {
+      if (document.getElementById("filterWildlifeViewing").checked) {
         filters["Wildlife_Viewing"] = "1";
         selectedField = "Wildlife_Viewing";
       } 
       
-      else if (document.getElementById("filterSleepawaySummerCamps").checked) {
+     if (document.getElementById("filterSleepawaySummerCamps").checked) {
         filters["Sleepaway_Summer_Camps"] = "1";
         selectedField = "Sleepaway_Summer_Camps";
       }
@@ -328,8 +324,10 @@ require([
             this.textContent = "Disable Clustering";
         }
     });
-  // HEATMAP
-  
+  /* 
+  ************************************************************
+         ****************   HEATMAP *******************
+  */
   const heatmapRenderer = {
     type: "heatmap",
     colorStops: [
@@ -375,8 +373,10 @@ function toggleHeatmapFunction() {
 }
 
 document.getElementById('toggleHeatmap').addEventListener('click', toggleHeatmapFunction);
-
-//OTHER ITEMS
+/* 
+  ************************************************************
+         ****************   OTHER ITEMS *******************
+  */
    
   view.whenLayerView(layer).then(function (layerView) {
     view.goTo(layerView.fullExtent.expand(1.2));
@@ -397,7 +397,7 @@ document.getElementById('toggleHeatmap').addEventListener('click', toggleHeatmap
     content: infoDiv,
     expandIcon: "list-bullet",
     expanded: false
-  }), "top-right");
+  }), "top-left");
 
 });
   
