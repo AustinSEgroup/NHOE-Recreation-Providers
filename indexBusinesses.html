@@ -30,25 +30,20 @@ body {
   font-size: 14px;
   border: none;
   color: white;
-  background-color: #207380 ;
+  background-color: #4caf50;
   cursor: pointer;
   text-align: center;
   transition-duration: 0.4s;
-
 }
 
 .toggle-btn:hover {
   /* Button Hover State */
-  background-color: #6bacad;
+  background-color: #45a049;
 }
 
 #mapContainer {
   position: relative;
   height: calc(100% - 20px); /* Adjust the height to make room for the top bar */
-}
-
-#infoDiv {
-  width: 120%;
 }
 
 #viewDiv {
@@ -70,9 +65,11 @@ body {
     <div id="selectedFieldDiv"></div>
 
     <div class="top-bar">
-      <button id="toggleLayer" class="toggle-btn">Toggle Layer Visibility</button>
-      <!-- <button id="toggleHeatmap" class="toggle-btn">Disable Heatmap</button> -->
-      
+
+      <button id="toggleLayer1" class="toggle-btn" data-layer="layer">Recreation Providers</button>
+      <button id="toggleLayer2" class="toggle-btn" data-layer="retailBusinesses">Retail Businesses</button>
+      <button id="toggleLayer3" class="toggle-btn" data-layer="nonProfits">Non-Profits</button>
+      <button id="toggleLayer4" class="toggle-btn" data-layer="B2B">B2B</button>
       <!-- Add other buttons you want to include in the top bar -->
     </div>
 
@@ -80,8 +77,6 @@ body {
     <div id="viewDiv"></div>
     <div id="infoDiv" class="esri-widget">
       <div id="filterDiv">
-        <button id="toggleClustering" class="toggle-btn">Toggle Clustering</button>
-        <br>
         <input type="checkbox" id="filterLessonsGuiding" />
         <label for="filterLessonsGuiding">Lessons/Guiding</label>
         <br>
